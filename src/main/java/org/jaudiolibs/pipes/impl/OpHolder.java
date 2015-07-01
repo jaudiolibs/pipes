@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -43,30 +43,46 @@ import org.jaudiolibs.pipes.Pipe;
  *
  * @author Neil C Smith
  */
-public class OpHolder extends SingleInOut {
+public class OpHolder<T extends AudioOp> extends SingleInOut {
 
-    private AudioOp op;
+    private T op;
     private float samplerate;
     private int buffersize;
     private int skipped;
+    private boolean initialized;
     private float[][] dataHolder;
 
-    public OpHolder(AudioOp op) {
-        if (op == null) {
-            throw new NullPointerException();
-        }
+    protected OpHolder() {
+        this(null);
+    }
+    
+    public OpHolder(T op) {
         this.op = op;
         dataHolder = new float[1][];
     }
     
+    protected void setOp(T op) {
+        this.op = op;
+        initialized = false;
+    }
+    
+    protected T getOp() {
+        return op;
+    }
+    
     @Override
     protected void process(Buffer buffer, boolean rendering) {
+        if (op == null) {
+            return;
+        }
         if (rendering) {
-            if (samplerate != buffer.getSampleRate() ||
+            if (!initialized ||
+                    samplerate != buffer.getSampleRate() ||
                     buffersize < buffer.getSize()) {
                 samplerate = buffer.getSampleRate();
                 buffersize = buffer.getSize();
                 op.initialize(samplerate, buffersize);
+                initialized = true;
                 skipped = 0;
             } else if (skipped != 0) {
                 op.reset(skipped);
@@ -81,7 +97,8 @@ public class OpHolder extends SingleInOut {
 
     @Override
     protected boolean isRenderRequired(Pipe source, long time) {
-        return op.isInputRequired(super.isRenderRequired(source, time));
+        boolean render = super.isRenderRequired(source, time);
+        return op == null ? render : op.isInputRequired(render);
     }
     
     

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -43,24 +43,38 @@ import org.jaudiolibs.pipes.Pipe;
  *
  * @author Neil C Smith
  */
-public class MultiChannelOpHolder extends MultiInOut {
+public class MultiChannelOpHolder<T extends AudioOp> extends MultiInOut {
 
-    private AudioOp op;
+    private T op;
     private float samplerate;
     private int buffersize;
     private int skipped;
+    private boolean initialized;
     private float[][] dataHolder;
 
-    public MultiChannelOpHolder(AudioOp op, int channels) {
+    protected MultiChannelOpHolder(int channels) {
+        this(null, channels);
+    }
+    
+    public MultiChannelOpHolder(T op, int channels) {
         super(channels, channels);
-        if (op == null) {
-            throw new NullPointerException();
-        }
         this.op = op;
     }
 
+    protected void setOp(T op) {
+        this.op = op;
+        initialized = false;
+    }
+    
+    protected T getOp() {
+        return op;
+    }
+    
     @Override
     protected void process(Buffer[] buffers, boolean rendering) {
+        if (op == null) {
+            return;
+        }
         int bCount = buffers.length;
         if (bCount == 0) {
             skipped = -1;
@@ -68,7 +82,8 @@ public class MultiChannelOpHolder extends MultiInOut {
         }
         if (rendering) {
             Buffer buffer = buffers[0];
-            if (samplerate != buffer.getSampleRate()
+            if (!initialized ||
+                    samplerate != buffer.getSampleRate()
                     || buffersize < buffer.getSize()) {
                 samplerate = buffer.getSampleRate();
                 buffersize = buffer.getSize();
@@ -94,6 +109,7 @@ public class MultiChannelOpHolder extends MultiInOut {
 
     @Override
     public boolean isRenderRequired(Pipe source, long time) {
-        return op.isInputRequired(super.isRenderRequired(source, time));
+        boolean render = super.isRenderRequired(source, time);
+        return op == null ? render : op.isInputRequired(render);
     }
 }
