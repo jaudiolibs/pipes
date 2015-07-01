@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -49,7 +49,7 @@ public abstract class SingleOut extends Pipe {
     private long time;
 
     @Override
-    public final void process(Pipe sink, Buffer buffer, long time) {
+    public void process(Pipe sink, Buffer buffer, long time) {
         processImpl(sink, buffer, time);
     }
 
@@ -70,7 +70,7 @@ public abstract class SingleOut extends Pipe {
     }
 
     @Override
-    public final void registerSink(Pipe sink) throws SourceIsFullException {
+    protected void registerSink(Pipe sink) throws SourceIsFullException {
         if (sink == null) {
             throw new NullPointerException();
         }
@@ -81,7 +81,7 @@ public abstract class SingleOut extends Pipe {
     }
 
     @Override
-    public final void unregisterSink(Pipe sink) {
+    protected void unregisterSink(Pipe sink) {
         if (this.sink == sink) {
             this.sink = null;
         }
@@ -109,12 +109,12 @@ public abstract class SingleOut extends Pipe {
     }
 
     @Override
-    public final int getSinkCount() {
+    public int getSinkCount() {
         return sink == null ? 0 : 1;
     }
 
     @Override
-    public final int getSinkCapacity() {
+    public int getSinkCapacity() {
         return 1;
     }
 

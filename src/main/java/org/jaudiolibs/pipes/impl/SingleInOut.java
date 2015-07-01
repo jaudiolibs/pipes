@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -50,7 +50,7 @@ public abstract class SingleInOut extends SingleOut {
     private boolean renderReqCache;
 
     @Override
-    public final void registerSource(Pipe source) {
+    protected void registerSource(Pipe source) {
         if (source == null) {
             throw new NullPointerException();
         }
@@ -61,7 +61,7 @@ public abstract class SingleInOut extends SingleOut {
     }
 
     @Override
-    public final void unregisterSource(Pipe source) {
+    protected void unregisterSource(Pipe source) {
         if (this.source == source) {
             this.source = null;
         }
@@ -109,7 +109,6 @@ public abstract class SingleInOut extends SingleOut {
             if (source == null) {
                 buffer.clear();
             } else {
-//                source.process(buffer, this, time);
                 callSource(source, buffer, time);
             }
             process(buffer, isRendering(time));
