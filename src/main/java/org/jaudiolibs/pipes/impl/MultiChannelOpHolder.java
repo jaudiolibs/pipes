@@ -88,6 +88,7 @@ public class MultiChannelOpHolder<T extends AudioOp> extends MultiInOut {
                 samplerate = buffer.getSampleRate();
                 buffersize = buffer.getSize();
                 op.initialize(samplerate, buffersize);
+                initialized = true;
                 skipped = 0;
             } else if (skipped != 0) {
                 op.reset(skipped);
