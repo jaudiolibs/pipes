@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -33,84 +33,76 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.jaudiolibs.pipes.impl;
+package org.jaudiolibs.pipes;
 
+import java.util.List;
+import java.util.Objects;
 import org.jaudiolibs.audioops.AudioOp;
-import org.jaudiolibs.pipes.Buffer;
-import org.jaudiolibs.pipes.Pipe;
 
 /**
  *
  * @author Neil C Smith
  */
-public class MultiChannelOpHolder<T extends AudioOp> extends MultiInOut {
+public class OpHolder<T extends AudioOp> extends Pipe {
 
-    private T op;
+    private final T op;
+
     private float samplerate;
     private int buffersize;
     private int skipped;
     private boolean initialized;
     private float[][] dataHolder;
 
-    protected MultiChannelOpHolder(int channels) {
-        this(null, channels);
-    }
-    
-    public MultiChannelOpHolder(T op, int channels) {
+    public OpHolder(T op, int channels) {
         super(channels, channels);
-        this.op = op;
+        this.op = Objects.requireNonNull(op);
     }
 
-    protected void setOp(T op) {
-        this.op = op;
-        initialized = false;
-    }
-    
     protected T getOp() {
         return op;
     }
-    
+
     @Override
-    protected void process(Buffer[] buffers, boolean rendering) {
-        if (op == null) {
-            return;
-        }
-        int bCount = buffers.length;
+    protected boolean isOutputRequired(Pipe source, long time) {
+        boolean output = super.isOutputRequired(source, time);
+        return op.isInputRequired(output);
+    }
+
+    @Override
+    protected void process(List<Buffer> buffers) {
+        int bCount = buffers.size();
         if (bCount == 0) {
             skipped = -1;
             return;
         }
-        if (rendering) {
-            Buffer buffer = buffers[0];
-            if (!initialized ||
-                    samplerate != buffer.getSampleRate()
-                    || buffersize < buffer.getSize()) {
-                samplerate = buffer.getSampleRate();
-                buffersize = buffer.getSize();
-                op.initialize(samplerate, buffersize);
-                initialized = true;
-                skipped = 0;
-            } else if (skipped != 0) {
-                op.reset(skipped);
-                skipped = 0;
-            }
-            if (dataHolder == null || dataHolder.length != bCount) {
-                dataHolder = new float[bCount][];
-            }
-            for (int i=0; i < bCount; i++) {
-                dataHolder[i] = buffers[i].getData();
-            }
-            op.processReplace(buffer.getSize(), dataHolder, dataHolder);
-        } else {
-            if (skipped != -1) {
-                skipped += buffers[0].getSize();
-            }
+        Buffer buffer = buffers.get(0);
+        if (!initialized
+                || samplerate != buffer.getSampleRate()
+                || buffersize < buffer.getSize()) {
+            samplerate = buffer.getSampleRate();
+            buffersize = buffer.getSize();
+            op.initialize(samplerate, buffersize);
+            initialized = true;
+            skipped = 0;
+        } else if (skipped != 0) {
+            op.reset(skipped);
+            skipped = 0;
         }
+        if (dataHolder == null || dataHolder.length != bCount) {
+            dataHolder = new float[bCount][];
+        }
+        for (int i = 0; i < bCount; i++) {
+            dataHolder[i] = buffers.get(0).getData();
+        }
+        op.processReplace(buffer.getSize(), dataHolder, dataHolder);
     }
 
     @Override
-    public boolean isRenderRequired(Pipe source, long time) {
-        boolean render = super.isRenderRequired(source, time);
-        return op == null ? render : op.isInputRequired(render);
+    protected void skip(int samples) {
+        if (skipped != -1) {
+            skipped += samples;
+        }
     }
+    
+    
 }

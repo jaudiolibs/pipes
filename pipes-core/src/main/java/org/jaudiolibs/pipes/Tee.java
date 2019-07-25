@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -34,23 +34,36 @@
  * have any questions.
  */
 
-package org.jaudiolibs.pipes.impl;
+package org.jaudiolibs.pipes;
 
-import org.jaudiolibs.pipes.Buffer;
+import java.util.List;
 
 /**
  *
  * @author Neil C Smith
  */
-public class Splitter extends MultiInOut {
+public class Tee extends Pipe {
     
-    public Splitter(int maxOutputs) {
+    public Tee() {
+        super(1, 64);
+    }
+    
+    public Tee(int maxOutputs) {
         super(1, maxOutputs);
     }
 
     @Override
-    protected void writeOutput(Buffer[] inputs, Buffer output, int index) {
-        super.writeOutput(inputs, output, 0);
+    protected void process(List<Buffer> buffers) {
+        // no op
     }
+
+    @Override
+    protected void writeOutput(List<Buffer> inputBuffers, Buffer outputBuffer, int sinkIndex) {
+        super.writeOutput(inputBuffers, outputBuffer, 0);
+    }
+    
+    
+
+    
     
 }

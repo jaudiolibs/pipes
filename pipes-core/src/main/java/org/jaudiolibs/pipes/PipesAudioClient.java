@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -33,25 +33,28 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.jaudiolibs.pipes.impl;
+package org.jaudiolibs.pipes;
 
 import java.nio.FloatBuffer;
 import org.jaudiolibs.audioservers.AudioConfiguration;
-import org.jaudiolibs.pipes.BufferRateListener;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jaudiolibs.audioservers.AudioClient;
-import org.jaudiolibs.pipes.*;
 
 /**
  *
  * @author Neil C Smith
  */
-public class BusClient implements Bus, AudioClient {
-    
-    private final static Logger LOG = Logger.getLogger(BusClient.class.getName());
+public class PipesAudioClient implements AudioClient {
 
+    private final static Logger LOG = Logger.getLogger(PipesAudioClient.class.getName());
+
+    private final InputSource[] sources;
+    private final OutputSink[] sinks;
+    private final List<Listener> listeners;
+    
     private float sampleRate;
     private int bufferSize;
     private int intBufferSize;
@@ -60,22 +63,17 @@ public class BusClient implements Bus, AudioClient {
     private long avgBufferTime;
     private long startTime;
     private long bufferCount;
-    private InputSource[] sources;
-    private OutputSink[] sinks;
-//    private List<BufferRateListener> listeners = new ArrayList<BufferRateListener>();
-    private BufferRateListener[] listeners;
-    private ConfigurationListener[] confListeners;
 
     /**
      *
      * @param inputs
      * @param outputs
      */
-    public BusClient(int inputs, int outputs) {
+    public PipesAudioClient(int inputs, int outputs) {
         this(0, inputs, outputs);
     }
-    
-    public BusClient(int intBufferSize, int inputs, int outputs) {
+
+    public PipesAudioClient(int intBufferSize, int inputs, int outputs) {
         if (intBufferSize < 0 || inputs < 0 || outputs < 1) {
             throw new IllegalArgumentException();
         }
@@ -88,60 +86,39 @@ public class BusClient implements Bus, AudioClient {
         for (int i = 0; i < inputs; i++) {
             sources[i] = new InputSource();
         }
-        listeners = new BufferRateListener[0];
-        confListeners = new ConfigurationListener[0];
+        listeners = new CopyOnWriteArrayList<>();
     }
 
-    @Override
-    public void addBufferRateListener(BufferRateListener listener) {
+    public void addListener(Listener listener) {
         if (listener == null) {
             throw new NullPointerException();
         }
-//        if (listeners.contains(listener)) {
-//            return;
-//        }
-//        listeners.add(listener);
-        listeners = Utils.arrayAdd(listeners, listener);
-    }
-
-    @Override
-    public void removeBufferRateListener(BufferRateListener listener) {
-//        listeners.remove(listener);
-        listeners = Utils.arrayRemove(listeners, listener);
-    }
-    
-    public void addConfigurationListener(ConfigurationListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
+        if (listeners.contains(listener)) {
+            return;
         }
-        confListeners = Utils.arrayAdd(confListeners, listener);
-    }
-    
-    public void removeConfigurationListener(ConfigurationListener listener) {
-        confListeners = Utils.arrayRemove(confListeners, listener);
+        listeners.add(listener);
     }
 
-    @Override
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+
     public long getTime() {
         return time;
     }
 
-    @Override
     public Pipe getSink(int index) {
         return sinks[index];
     }
 
-    @Override
     public int getSinkCount() {
         return sinks.length;
     }
 
-    @Override
     public Pipe getSource(int index) {
         return sources[index];
     }
 
-    @Override
     public int getSourceCount() {
         return sources.length;
     }
@@ -180,15 +157,15 @@ public class BusClient implements Bus, AudioClient {
         bufferCount = 0;
         LOG.fine("Buffer time is " + bufferTime);
         // call conf listeners here - after our validation
-        for (ConfigurationListener listener : confListeners) {
+        for (Listener listener : listeners) {
             listener.configure(context);
         }
-        
+
         for (InputSource source : sources) {
             source.data = new float[intBufferSize];
         }
         for (OutputSink sink : sinks) {
-            sink.buffer = new DefaultBuffer(sampleRate, intBufferSize);
+            sink.buffer = new Buffer(sampleRate, intBufferSize);
         }
         int activeCount = Math.min(context.getOutputChannelCount(), sinks.length);
         for (int i = 0; i < activeCount; i++) {
@@ -205,16 +182,9 @@ public class BusClient implements Bus, AudioClient {
         if ((time - this.time) < 0) {
             LOG.warning("Passed in time less than last time\nPassed in : " + time + "\nLast time : " + this.time);
         }
-            
+
         int count = nframes / intBufferSize;
-//        if (bufferCount <= 0) {
-//            startTime = time;    
-//            bufferCount = 0;
-//        } else {
-//            avgBufferTime = (time - startTime) / bufferCount;
-//        }     
-//        bufferCount += count;
-        
+
         time -= (count - 1) * avgBufferTime;
         for (int i = 0; i < count; i++) {
             setTime(time);
@@ -240,12 +210,10 @@ public class BusClient implements Bus, AudioClient {
     }
 
     private void fireListeners() {
-//        int count = listeners.size();
-//        for (int i = 0; i < count; i++) {
-//            listeners.get(i).nextBuffer(this);
-//        }
-        for (BufferRateListener listener : listeners) {
-            listener.nextBuffer(this);
+        try {
+            listeners.forEach(Listener::process);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Listener threw exception during process", ex);
         }
     }
 
@@ -269,78 +237,46 @@ public class BusClient implements Bus, AudioClient {
         for (OutputSink sink : sinks) {
             sink.active = false;
         }
-        for (ConfigurationListener listener : confListeners) {
-            listener.shutdown();
+        try {
+            listeners.forEach(Listener::shutdown);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Listener threw exception during shutdown", ex);
         }
     }
-    
-    public static interface ConfigurationListener {
-        
+
+    public static interface Listener {
+
         public void configure(AudioConfiguration context) throws Exception;
         
+        public void process();
+
         public void shutdown();
-        
+
     }
 
-    private class OutputSink extends Pipe {
 
-        private Pipe source; // only allow one connection
+    private final class OutputSink extends Pipe {
+
         private boolean active = false;
-        private DefaultBuffer buffer;
+        private Buffer buffer;
 
-        @Override
-        public void registerSource(Pipe source) {
-            if (source == null) {
-                throw new NullPointerException();
-            }
-            if (this.source != null) {
-                throw new SinkIsFullException();
-            }
-            this.source = source;
+        private OutputSink() {
+            super(1,1);
+            registerSink(this);
         }
-
+        
         @Override
-        public void unregisterSource(Pipe source) {
-            if (this.source == source) {
-                this.source = null;
-            }
-        }
-
-        @Override
-        protected boolean isRenderRequired(Pipe source, long time) {
-            return active; //(source == this.source && time == this.time);
+        protected boolean isOutputRequired(Pipe source, long time) {
+            return active;
         }
 
         private void process() {
-            if (source != null) {
-//                source.process(buffer, this, time);
-                callSource(source, buffer, time);
-            } else if (active) {
-                buffer.clear();
-            }
+            super.process(this, buffer, time);
         }
 
         @Override
-        public int getSourceCount() {
-            return source == null ? 0 : 1;
-        }
-
-        @Override
-        public int getSourceCapacity() {
-            return 1;
-        }
-
-        @Override
-        public Pipe getSource(int idx) {
-            if (idx == 0 && source != null) {
-                return source;
-            }
-            throw new IndexOutOfBoundsException();
-        }
-
-        @Override
-        public int getSinkCount() {
-            return 0;
+        protected void process(List<Buffer> buffers) {
+            // no op
         }
 
         @Override
@@ -349,120 +285,32 @@ public class BusClient implements Bus, AudioClient {
         }
 
         @Override
+        public int getSinkCount() {
+            return 0;
+        }
+
+        @Override
         public Pipe getSink(int idx) {
             throw new IndexOutOfBoundsException();
         }
+        
+        
 
-        @Override
-        protected void process(Pipe sink, Buffer buffer, long time) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void registerSink(Pipe sink) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void unregisterSink(Pipe sink) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private class InputSource extends Pipe {
 
-        private Pipe sink;
         private float[] data;
 
         private InputSource() {
-            data = null;
+            super(0,1);
         }
 
         @Override
-        public void process(Pipe sink, Buffer buffer, long time) {
-            if (sink == this.sink && sinkRequiresRender(sink, time)) {
-//                FloatBuffer in = data;
-//                if (in == null) {
-//                    buffer.clear();
-//                } else {
-//                    int len = Math.min(in.capacity(), buffer.getSize());
-//                    float[] out = buffer.getData();
-//                    in.get(out, 0, len);
-//                }
-                if (data == null) {
-                    buffer.clear();
-                } else {
-                    float[] out = buffer.getData();
-                    int len = buffer.getSize();
-                    System.arraycopy(data, 0, out, 0, len);
-                }
-            }
+        protected void process(List<Buffer> buffers) {
+            Buffer output = buffers.get(0);
+            System.arraycopy(data, 0, output.getData(), 0, output.getSize());
         }
 
-        @Override
-        public void registerSink(Pipe sink) throws SourceIsFullException {
-            if (sink == null) {
-                throw new NullPointerException();
-            }
-            if (this.sink != null) {
-                throw new SourceIsFullException();
-            }
-            this.sink = sink;
-        }
-
-        @Override
-        public void unregisterSink(Pipe sink) {
-            if (this.sink == sink) {
-                this.sink = null;
-            }
-        }
-
-        @Override
-        public int getSourceCount() {
-            return 0;
-        }
-
-        @Override
-        public int getSourceCapacity() {
-            return 0;
-        }
-
-        @Override
-        public Pipe getSource(int idx) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        @Override
-        public int getSinkCount() {
-            return sink == null ? 0 : 1;
-        }
-
-        @Override
-        public int getSinkCapacity() {
-            return 1;
-        }
-
-        @Override
-        public Pipe getSink(int idx) {
-            if (idx == 0 && sink != null) {
-                return sink;
-            }
-            throw new IndexOutOfBoundsException();
-        }
-
-        @Override
-        protected boolean isRenderRequired(Pipe source, long time) {
-            return false;
-        }
-
-        @Override
-        protected void registerSource(Pipe source) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void unregisterSource(Pipe source) {
-            throw new UnsupportedOperationException();
-        }
     }
 }

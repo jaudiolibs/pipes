@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -33,31 +33,77 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class Buffer {
-    
-    public abstract float getSampleRate();
-    
-    public abstract int getSize();
-        
-    public abstract float[] getData();
+public final class Buffer {
 
-    public abstract void clear();
-//    
-//    public boolean isSilent() {
-//        return false;
-//    }
-    
-    public abstract boolean isCompatible(Buffer buffer);
-    
-    public abstract Buffer createBuffer();
+    private final float[] data;
+    private final float sampleRate;
+    private final int bufferSize;
 
+    public Buffer(float sampleRate, int bufferSize) {
+        if (sampleRate < 1 || bufferSize < 1) {
+            throw new IllegalArgumentException();
+        }
+        this.sampleRate = sampleRate;
+        this.bufferSize = bufferSize;
+        this.data = new float[bufferSize];
+
+    }
+
+    public float[] getData() {
+        return data;
+    }
+
+    public boolean isCompatible(Buffer buffer) {
+        return buffer.sampleRate == sampleRate
+                && buffer.bufferSize == bufferSize;
+    }
+
+    public Buffer createBuffer() {
+        return new Buffer(sampleRate, bufferSize);
+    }
+
+    public float getSampleRate() {
+        return this.sampleRate;
+    }
+
+    public int getSize() {
+        return this.bufferSize;
+    }
+
+    public void clear() {
+        Arrays.fill(data, 0);
+    }
+    
+    public void dispose() {}
+
+    public void copy(Buffer source) {
+        System.arraycopy(source.data, 0, data, 0, data.length);
+    }
+    
+    public void add(Buffer source) {
+        for (int i = 0; i < bufferSize; i++) {
+            data[i] += source.data[i];
+        }
+    }
+
+    public void mix(List<Buffer> sources) {
+        if (sources.isEmpty()) {
+            clear();
+        } else {
+            copy(sources.get(0));
+            for (int i = 1; i < sources.size(); i++) {
+                add(sources.get(i));
+            }
+        }
+    }
+    
 }
-
-

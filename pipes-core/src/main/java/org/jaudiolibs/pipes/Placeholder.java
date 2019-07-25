@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -34,18 +34,22 @@
  * have any questions.
  */
 
-package org.jaudiolibs.pipes.impl;
+package org.jaudiolibs.pipes;
 
-import org.jaudiolibs.pipes.Buffer;
+import java.util.List;
 
 /**
  *
  * @author Neil C Smith
  */
-public class Placeholder extends SingleInOut {
+public class Placeholder extends Pipe {
+
+    public Placeholder() {
+        super(1, 1);
+    }
 
     @Override
-    protected void process(Buffer buffer, boolean rendering) {
+    protected void process(List<Buffer> buffers) {
         // no op
     }
 

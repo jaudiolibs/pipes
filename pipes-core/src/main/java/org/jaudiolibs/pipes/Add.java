@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -33,24 +33,35 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes;
+
+import java.util.List;
+
 
 /**
  *
  * @author Neil C Smith
  */
-public interface Bus extends BufferRateSource {
-
-
-    public Pipe getSink(int index);
-
-    public int getSinkCount();
-
-    public Pipe getSource(int index);
-
-    public int getSourceCount();
-    
+public class Add extends Pipe {
 
     
+    public Add() {
+        super(64, 1);
+    }
+    
+    
+    public Add(int maxInputs) {
+        super(maxInputs, 1);
+    }
+
+    @Override
+    protected void process(List<Buffer> buffers) {
+        // no op
+    }
+
+    @Override
+    protected void writeOutput(List<Buffer> inputBuffers, Buffer outputBuffer, int sinkIndex) {
+        outputBuffer.mix(inputBuffers);
+    }
+
 }
