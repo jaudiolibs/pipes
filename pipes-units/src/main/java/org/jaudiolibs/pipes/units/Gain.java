@@ -20,27 +20,41 @@
  * have any questions.
  *
  */
+package org.jaudiolibs.pipes.units;
 
-package org.jaudiolibs.pipes;
+import org.jaudiolibs.audioops.impl.GainOp;
+import org.jaudiolibs.pipes.OpHolder;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public class SourceIsFullException extends RuntimeException {
+public final class Gain extends OpHolder {
 
-    /**
-     * Creates a new instance of <code>SourceIsFullException</code> without detail message.
-     */
-    public SourceIsFullException() {
+    private final GainOp op;
+    
+    public Gain() {
+        this(new GainOp());
+    }
+    
+    private Gain(GainOp op) {
+        super(op, 1);
+        this.op = op;
+        reset();
+    }
+    
+    public Gain level(double level) {
+        op.setGain((float) level);
+        return this;
+    }
+    
+    public double level() {
+        return op.getGain();
     }
 
-
-    /**
-     * Constructs an instance of <code>SourceIsFullException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public SourceIsFullException(String msg) {
-        super(msg);
+    @Override
+    public void reset() {
+        op.setGain(1);
     }
+    
 }

@@ -20,27 +20,13 @@
  * have any questions.
  *
  */
-
-package org.jaudiolibs.pipes;
+package org.jaudiolibs.pipes.units;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public class SourceIsFullException extends RuntimeException {
-
-    /**
-     * Creates a new instance of <code>SourceIsFullException</code> without detail message.
-     */
-    public SourceIsFullException() {
-    }
-
-
-    /**
-     * Constructs an instance of <code>SourceIsFullException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public SourceIsFullException(String msg) {
-        super(msg);
-    }
+public enum Waveform {
+    Sine, Square, Saw
+    
 }

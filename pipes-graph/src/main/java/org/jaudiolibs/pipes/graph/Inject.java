@@ -18,29 +18,27 @@
  *
  * Please visit https://www.praxislive.org if you need additional information or
  * have any questions.
- *
  */
+package org.jaudiolibs.pipes.graph;
 
-package org.jaudiolibs.pipes;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith
+ * Annotate a field to be injected - an injected field will be automatically
+ * created and persisted between code changes. Injected fields do not have ports
+ * or controls, and values are not saved to projects.
+ * <p>
+ * The @Inject annotation may be used on fields of type {@link Ref}, {@link Property},
+ * or any field type that can be backed by a Property - String, double, float, int, boolean,
+ * PArray, PBytes, any enum, any Serializable implementation, or a List of Serializable
+ * subclasses.
+ * 
  */
-public class SourceIsFullException extends RuntimeException {
-
-    /**
-     * Creates a new instance of <code>SourceIsFullException</code> without detail message.
-     */
-    public SourceIsFullException() {
-    }
-
-
-    /**
-     * Constructs an instance of <code>SourceIsFullException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public SourceIsFullException(String msg) {
-        super(msg);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Inject {
+    
 }

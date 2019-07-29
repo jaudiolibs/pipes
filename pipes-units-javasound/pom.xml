@@ -9,13 +9,14 @@
   </parent>
   
   <groupId>org.jaudiolibs</groupId>
-  <artifactId>pipes-core</artifactId>
-  <name>Pipes Core</name>
+  <artifactId>pipes-units-javasound</artifactId>
+  <name>Pipes Units JavaSound</name>
+  <description>Pipes Units API support using JavaSound.</description>
   
   <licenses>
     <license>
-      <name>GNU Lesser General Public License</name>
-      <url>http://www.gnu.org/licenses/lgpl.html</url>
+      <name>GPLv2 with classpath exception</name>
+      <url>https://www.gnu.org/software/classpath/license.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -50,8 +51,18 @@
     </dependency>
     <dependency>
       <groupId>org.jaudiolibs</groupId>
-      <artifactId>audioservers-api</artifactId>
-      <version>1.2.0</version>
+      <artifactId>audioops-impl</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pipes-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pipes-units</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   

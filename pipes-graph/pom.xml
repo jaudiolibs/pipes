@@ -9,8 +9,10 @@
   </parent>
   
   <groupId>org.jaudiolibs</groupId>
-  <artifactId>pipes-core</artifactId>
-  <name>Pipes Core</name>
+  <artifactId>pipes-graph</artifactId>
+  <name>Pipes Graph</name>
+  <description>Support for building and running graphs of Pipes UGens, based on
+    the audio API inside PraxisCORE.</description>
   
   <licenses>
     <license>
@@ -50,8 +52,18 @@
     </dependency>
     <dependency>
       <groupId>org.jaudiolibs</groupId>
-      <artifactId>audioservers-api</artifactId>
-      <version>1.2.0</version>
+      <artifactId>audioops-impl</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pipes-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pipes-units</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   

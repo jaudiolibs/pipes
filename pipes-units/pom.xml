@@ -9,8 +9,9 @@
   </parent>
   
   <groupId>org.jaudiolibs</groupId>
-  <artifactId>pipes-core</artifactId>
-  <name>Pipes Core</name>
+  <artifactId>pipes-units</artifactId>
+  <name>Pipes Units</name>
+  <description>Unit Generator Pipes for use with the Pipes API</description>
   
   <licenses>
     <license>
@@ -19,7 +20,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
+  
   <build>
     <plugins>
       <plugin>
@@ -50,8 +51,13 @@
     </dependency>
     <dependency>
       <groupId>org.jaudiolibs</groupId>
-      <artifactId>audioservers-api</artifactId>
-      <version>1.2.0</version>
+      <artifactId>audioops-impl</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>pipes-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   
