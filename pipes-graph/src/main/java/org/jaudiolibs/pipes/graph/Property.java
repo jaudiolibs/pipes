@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.graph;
 
@@ -28,10 +24,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 
+/**
+ * A wrapper type for double values that supports key frame animation in sync
+ * with the {@link Graph}. This type partly parallels the same named type in the
+ * PraxisLIVE (audio) API.
+ * <p>
+ * Property fields may be annotated with {@link Inject}.
+ */
 public final class Property implements Graph.Dependent {
 
     private static final long TO_NANO = 1000_000_000;
-    
+
     private final List<Link> links;
 
     private Animator animator;
@@ -42,12 +45,19 @@ public final class Property implements Graph.Dependent {
         this.links = new CopyOnWriteArrayList<>();
     }
 
+    /**
+     * Set the value of this property. This will cancel any active animation,
+     * and notify any attached links.
+     *
+     * @param value
+     * @return this
+     */
     public Property set(double value) {
         finishAnimating();
         setImpl(value);
         return this;
     }
-    
+
     /**
      * Return the current value.
      *
@@ -71,17 +81,15 @@ public final class Property implements Graph.Dependent {
         return this;
     }
 
-
     /**
      * Return a new {@link Linkable.Double} for observing changing values. The
-     * double value will be as if calling {@link #getDouble()}.
+     * double value will be as if calling {@link #get()}.
      *
      * @return Linkable.Double of values.
      */
     public Linkable.Double values() {
         return new Link();
     }
-
 
     /**
      * Clear all Linkables from the Property.
@@ -135,7 +143,7 @@ public final class Property implements Graph.Dependent {
             animator.tick();
         }
     }
-    
+
     /**
      * Return whether the property is currently animating.
      *
@@ -149,7 +157,7 @@ public final class Property implements Graph.Dependent {
         this.value = value;
         updateLinks();
     }
-    
+
     private void finishAnimating() {
         if (animator != null) {
             animator.stop();
@@ -159,8 +167,6 @@ public final class Property implements Graph.Dependent {
     private void updateLinks() {
         links.forEach(l -> l.fire(value));
     }
-
-    
 
     private class Link implements Linkable.Double {
 

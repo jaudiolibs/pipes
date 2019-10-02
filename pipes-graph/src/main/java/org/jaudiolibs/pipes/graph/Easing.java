@@ -15,16 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.graph;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * Easing types for use with {@link Property.Animator#easing}
  */
 public interface Easing {
     

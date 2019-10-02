@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.graph;
 
@@ -27,10 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
-/**
- *
- * @author Neil C Smith (http://neilcsmith.net)
- */
 abstract class AbstractLinkable<IN, OUT> implements Consumer<IN>, Linkable<OUT> {
 
     private final Linkable<IN> source;

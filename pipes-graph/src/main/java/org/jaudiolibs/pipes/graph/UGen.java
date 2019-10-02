@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.graph;
 
@@ -28,11 +24,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotate a field to be injected - an injected field will be automatically
+ * added in to the {@link Graph} subclass by {@link GraphPlayer}. This process
+ * is designed to align with the audio API in PraxisLIVE.
+ * <p>
+ * This annotation can be used on fields of any subtype of {@link Pipe}. Any
+ * existing value of fields will be ignored.
  *
- * @author Neil C Smith (http://neilcsmith.net)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface UGen {
-    
+
 }

@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.graph;
 
@@ -38,12 +34,10 @@ import java.util.function.Predicate;
  * Linkable is a lightweight form of reactive stream for listening to changing
  * values from inputs, properties, animation, etc. Functions can be used to
  * filter and map incoming values. Linkables must be {@link #link linked} to a
- * Consumer to complete the pipeline or no values will be processed.
+ * Consumer to complete the pipeline or no values will be processed. Only
+ * stateless operations are currently supported.
  * <p>
- * Only stateless operations are currently supported. Operations that require
- * access to previous values (limit, sort, distinct, etc.) require combining
- * with one of the other mechanisms (eg. {@link Inject} or {@link Ref}) for
- * retaining state across code changes.
+ * This API is derived from the similarly named type in the PraxisLIVE API.
  *
  * @param <T>
  */
@@ -109,8 +103,8 @@ public interface Linkable<T> {
         public void link(DoubleConsumer consumer);
 
         /**
-         * Returns a Linkable.Double that wraps this Linkable.Double and transforms
-         * values using the provided mapping function.
+         * Returns a Linkable.Double that wraps this Linkable.Double and
+         * transforms values using the provided mapping function.
          *
          * @param function transform values
          * @return
@@ -123,7 +117,7 @@ public interface Linkable<T> {
                 }
             };
         }
-        
+
         /**
          * Returns a Linkable that wraps this Linkable.Double and transforms
          * values using the provided mapping function.
@@ -142,7 +136,7 @@ public interface Linkable<T> {
         }
 
         /**
-         * Returns a Linkable.Double that wraps this Linkable.Double and filters 
+         * Returns a Linkable.Double that wraps this Linkable.Double and filters
          * values using the provided predicate function.
          *
          * @param predicate
@@ -193,8 +187,8 @@ public interface Linkable<T> {
         }
 
         /**
-         * Returns a Linkable that wraps this Linkable.Int and transforms
-         * values using the provided mapping function.
+         * Returns a Linkable that wraps this Linkable.Int and transforms values
+         * using the provided mapping function.
          *
          * @param <R> generic type of returned Linkable
          * @param function transform values
@@ -208,9 +202,9 @@ public interface Linkable<T> {
                 }
             };
         }
-        
+
         /**
-         * Returns a Linkable.Int that wraps this Linkable.Int and filters 
+         * Returns a Linkable.Int that wraps this Linkable.Int and filters
          * values using the provided predicate function.
          *
          * @param predicate

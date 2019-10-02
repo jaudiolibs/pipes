@@ -15,9 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
  */
 package org.jaudiolibs.pipes.graph;
 
@@ -27,19 +24,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.IntConsumer;
 
 /**
- * A field type for triggers (actions) - see {@link T @T}. The Trigger type
- * provides a Linkable.Int for listening for triggers, and maintains a count of
- * each time the trigger has been called (useful for sequencing). It is also
- * possible to connect Runnable functions to be called on each trigger.
+ * A Clock that triggers at subdivisions of a given BPM, synchronized to the
+ * audio playback clock. All clock triggers happen at the beginning of an audio
+ * buffer, so the actual rate may be slightly different to the requested BPM to
+ * ensure a uniform clock period.
+ * <p>
+ * Clock provides a {@link Linkable.Int} for subscribing to triggers,
+ * maintaining a continuously rising count. It is also possible to add Runnable
+ * functions to be called on each clock trigger.
+ * <p>
+ * Clock fields may be annotated with {@link Inject}.
  */
 public final class Clock implements Graph.Dependent {
 
     private final List<Link> links;
-    
+
     private Graph graph;
     private int index;
     private int maxIndex;
-    
+
     private double bpm = 120;
     private int subdivision = 4;
     private int bufferCount;
@@ -55,7 +58,7 @@ public final class Clock implements Graph.Dependent {
         this.graph = graph;
         updatePulse();
     }
-    
+
     @Override
     public void update() {
         if (position++ == 0) {
@@ -63,28 +66,27 @@ public final class Clock implements Graph.Dependent {
         }
         position %= bufferCount;
     }
-    
+
     public Clock bpm(double bpm) {
         this.bpm = bpm;
         updatePulse();
         return this;
     }
-    
+
     public double bpm() {
         return bpm;
     }
-    
+
     public Clock subdivision(int subdivision) {
         this.subdivision = subdivision;
         updatePulse();
         return this;
     }
-    
+
     public int subdivision() {
         return subdivision;
     }
-    
-    
+
     /**
      * Clear all Linkables from this Trigger.
      *
@@ -189,8 +191,7 @@ public final class Clock implements Graph.Dependent {
 //        period = bufferCount * (blockSize / sampleRate);
 //        actualBpm = 60 / subdivision * (1 / period);
     }
-    
-    
+
     private class Link implements Linkable.Int {
 
         private IntConsumer consumer;
