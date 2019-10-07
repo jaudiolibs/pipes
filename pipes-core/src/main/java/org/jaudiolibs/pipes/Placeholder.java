@@ -15,19 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
-
 package org.jaudiolibs.pipes;
 
 import java.util.List;
 
 /**
- *
- * @author Neil C Smith
+ * A placeholder no-op Pipe that supports one source and one sink, and passes
+ * buffers through in-place.
  */
 public class Placeholder extends Pipe {
 

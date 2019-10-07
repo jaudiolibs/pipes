@@ -15,28 +15,29 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes;
 
 import java.util.List;
 
-
 /**
- *
- * @author Neil C Smith
+ * A Pipe that sums the samples from multiple inputs. An Add supports one
+ * output.
  */
 public final class Add extends Pipe {
 
-    
+    /**
+     * Create an Add supporting up to 64 inputs.
+     */
     public Add() {
         super(64, 1);
     }
-    
-    
+
+    /**
+     * Create an Add supporting up to the given number of inputs.
+     *
+     * @param maxInputs maximum number of inputs
+     */
     public Add(int maxInputs) {
         super(maxInputs, 1);
     }

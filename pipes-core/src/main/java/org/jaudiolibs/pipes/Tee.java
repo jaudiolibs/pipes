@@ -15,26 +15,28 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
-
 package org.jaudiolibs.pipes;
 
 import java.util.List;
 
 /**
- *
- * @author Neil C Smith
+ * Pipe that splits a single input to multiple outputs.
  */
 public class Tee extends Pipe {
-    
+
+    /**
+     * Create a Tee that supports a maximum of 64 outputs.
+     */
     public Tee() {
         super(1, 64);
     }
-    
+
+    /**
+     * Create a Tee that supports up to the specified number of outputs.
+     *
+     * @param maxOutputs maximum number of outputs
+     */
     public Tee(int maxOutputs) {
         super(1, maxOutputs);
     }
@@ -48,9 +50,5 @@ public class Tee extends Pipe {
     protected void writeOutput(List<Buffer> inputBuffers, Buffer outputBuffer, int sinkIndex) {
         super.writeOutput(inputBuffers, outputBuffer, 0);
     }
-    
-    
 
-    
-    
 }

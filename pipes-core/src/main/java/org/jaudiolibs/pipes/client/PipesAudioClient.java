@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.client;
 
@@ -33,8 +29,7 @@ import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.Pipe;
 
 /**
- *
- * @author Neil C Smith
+ * An implementation of {@link AudioClient} that processes a graph of Pipes.
  */
 public class PipesAudioClient implements AudioClient {
 
@@ -43,7 +38,7 @@ public class PipesAudioClient implements AudioClient {
     private final InputSource[] sources;
     private final OutputSink[] sinks;
     private final List<Listener> listeners;
-    
+
     private float sampleRate;
     private int bufferSize;
     private int intBufferSize;
@@ -54,14 +49,31 @@ public class PipesAudioClient implements AudioClient {
     private long bufferCount;
 
     /**
+     * Create a PipesAudioClient supporting the specified number of inputs and
+     * outputs. The internal buffer size (size of buffers in the Pipes graph)
+     * will be the same as the buffer size of the audio client's configuration.
      *
-     * @param inputs
-     * @param outputs
+     * @param inputs number of inputs (may be 0)
+     * @param outputs number of outputs (at least 1)
+     * @see
+     * AudioClient#configure(org.jaudiolibs.audioservers.AudioConfiguration)
      */
     public PipesAudioClient(int inputs, int outputs) {
         this(0, inputs, outputs);
     }
 
+    /**
+     * Create a PipesAudioClient supporting the specified number of inputs and
+     * outputs, and the provided internal buffer size for buffers in the Pipes
+     * graph. The external buffer size of the audio client's configuration must
+     * be a multiple of the internal buffer size.
+     *
+     * @param intBufferSize
+     * @param inputs number of inputs (may be 0)
+     * @param outputs number of outputs (at least 1)
+     * @see
+     * AudioClient#configure(org.jaudiolibs.audioservers.AudioConfiguration)
+     */
     public PipesAudioClient(int intBufferSize, int inputs, int outputs) {
         if (intBufferSize < 0 || inputs < 0 || outputs < 1) {
             throw new IllegalArgumentException();
@@ -78,6 +90,11 @@ public class PipesAudioClient implements AudioClient {
         listeners = new CopyOnWriteArrayList<>();
     }
 
+    /**
+     * Add a {@link Listener} to this PipesAudioClient.
+     *
+     * @param listener
+     */
     public void addListener(Listener listener) {
         if (listener == null) {
             throw new NullPointerException();
@@ -88,30 +105,65 @@ public class PipesAudioClient implements AudioClient {
         listeners.add(listener);
     }
 
+    /**
+     * Remove a {@link Listener} from this PipesAudioClient.
+     *
+     * @param listener
+     */
     public void removeListener(Listener listener) {
         listeners.remove(listener);
     }
 
+    /**
+     * Query the current time in nanoseconds.
+     *
+     * @return current time
+     */
     public long getTime() {
         return time;
     }
 
+    /**
+     * Get the sink (output) at the specified index.
+     *
+     * @param index sink position
+     * @return sink
+     */
     public Pipe getSink(int index) {
         return sinks[index];
     }
 
+    /**
+     * Query the number of sinks (outputs) this audio client has available.
+     *
+     * @return number of sinks
+     */
     public int getSinkCount() {
         return sinks.length;
     }
 
+    /**
+     * Get the source (input) at the specified index.
+     *
+     * @param index source position
+     * @return source
+     */
     public Pipe getSource(int index) {
         return sources[index];
     }
 
+    /**
+     * Query the number of sources (inputs) this audio client has available.
+     *
+     * @return number of sources
+     */
     public int getSourceCount() {
         return sources.length;
     }
 
+    /**
+     * Disconnect all Pipes connected to this client.
+     */
     public void disconnectAll() {
         for (InputSource source : sources) {
             if (source.getSinkCount() == 1) {
@@ -233,13 +285,33 @@ public class PipesAudioClient implements AudioClient {
         }
     }
 
+    /**
+     * An interface for listening on configuration, shutdown and every process
+     * cycle of this client.
+     */
     public static interface Listener {
 
-        public default void configure(AudioConfiguration context) throws Exception {}
-        
+        /**
+         * Called when the client is configured.
+         *
+         * @param context configuration of the AudioServer
+         * @throws Exception to reject the configuration
+         */
+        public default void configure(AudioConfiguration context) throws Exception {
+        }
+
+        /**
+         * Called on every buffer process cycle before the Pipe graph is
+         * processed.
+         */
         public void process();
 
-        public default  void shutdown() {};
+        /**
+         * Called when the client is being shut down by the AudioServer.
+         */
+        public default void shutdown() {
+        }
+    ;
 
     }
 
@@ -250,10 +322,10 @@ public class PipesAudioClient implements AudioClient {
         private Buffer buffer;
 
         private OutputSink() {
-            super(1,1);
+            super(1, 1);
             registerSink(this);
         }
-        
+
         @Override
         protected boolean isOutputRequired(Pipe source, long time) {
             return active;
@@ -282,8 +354,6 @@ public class PipesAudioClient implements AudioClient {
         public Pipe getSink(int idx) {
             throw new IndexOutOfBoundsException();
         }
-        
-        
 
     }
 
@@ -292,7 +362,7 @@ public class PipesAudioClient implements AudioClient {
         private float[] data;
 
         private InputSource() {
-            super(0,1);
+            super(0, 1);
         }
 
         @Override

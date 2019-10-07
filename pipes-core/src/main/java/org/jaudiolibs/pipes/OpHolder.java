@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes;
 
@@ -27,8 +23,7 @@ import java.util.Objects;
 import org.jaudiolibs.audioops.AudioOp;
 
 /**
- *
- * @author Neil C Smith
+ * A Pipe subclass that wraps an {@link AudioOp}.
  */
 public class OpHolder extends Pipe {
 
@@ -40,10 +35,27 @@ public class OpHolder extends Pipe {
     private boolean initialized;
     private float[][] dataHolder;
 
+    /**
+     * Create a Pipe that wraps the provided AudioOp with the specified number
+     * of channels. No check is made that the op actually supports that number
+     * of channels.
+     *
+     * @param op AudioOp to process data
+     * @param channels number of input and output channels
+     */
     public OpHolder(AudioOp op, int channels) {
         this(op, channels, channels);
     }
-    
+
+    /**
+     * Create a Pipe that wraps the provided AudioOp with the specified number
+     * of input and output channels. No check is made that the op actually
+     * supports that number of channels.
+     *
+     * @param op AudioOp to process data
+     * @param inputsChannels number of input channels
+     * @param outputChannels number of output channels
+     */
     public OpHolder(AudioOp op, int inputsChannels, int outputChannels) {
         super(inputsChannels, outputChannels);
         this.op = Objects.requireNonNull(op);
@@ -79,7 +91,7 @@ public class OpHolder extends Pipe {
             dataHolder = new float[bCount][];
         }
         for (int i = 0; i < bCount; i++) {
-            dataHolder[i] = buffers.get(0).getData();
+            dataHolder[i] = buffers.get(i).getData();
         }
         op.processReplace(buffer.getSize(), dataHolder, dataHolder);
     }
@@ -90,6 +102,5 @@ public class OpHolder extends Pipe {
             skipped += samples;
         }
     }
-    
-    
+
 }

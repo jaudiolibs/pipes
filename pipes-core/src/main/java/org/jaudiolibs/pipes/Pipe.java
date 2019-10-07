@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes;
 
@@ -26,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author Neil C Smith
+ * The base type of the Pipes library. A Pipe is a unit generator, providing the
+ * basic building blocks for synthesis and signal-processing. Pipes are joined
+ * to each other in a graph-like structure of sources and sinks.
  */
 public abstract class Pipe {
 
@@ -42,6 +39,13 @@ public abstract class Pipe {
     private boolean renderReqCache;
     private int renderIdx = 0;
 
+    /**
+     * Base constructor. The capacity, the maximum number of source and sink
+     * pipes that can be connected, must be specified.
+     *
+     * @param sourceCapacity maximum number of sources
+     * @param sinkCapacity maximum numbers of sinks
+     */
     protected Pipe(int sourceCapacity, int sinkCapacity) {
         sources = sourceCapacity < 8 ? new ArrayList<>(sourceCapacity) : new ArrayList<>();
         sinks = sinkCapacity < 8 ? new ArrayList<>(sinkCapacity) : new ArrayList<>();
@@ -50,6 +54,11 @@ public abstract class Pipe {
         this.sinkCapacity = sinkCapacity;
     }
 
+    /**
+     * Add another Pipe as a source.
+     *
+     * @param source pipe to add
+     */
     public final void addSource(Pipe source) {
         source.registerSink(this);
         try {
@@ -60,37 +69,93 @@ public abstract class Pipe {
         }
     }
 
+    /**
+     * Remove a source Pipe.
+     *
+     * @param source pipe to remove
+     */
     public final void removeSource(Pipe source) {
         source.unregisterSink(this);
         unregisterSource(source);
     }
 
+    /**
+     * Query the actual number of connected sources.
+     *
+     * @return number of sources
+     */
     public int getSourceCount() {
         return sources.size();
     }
 
+    /**
+     * Query the maximum number of sources supported.
+     *
+     * @return maximum number of sources
+     */
     public int getSourceCapacity() {
         return sourceCapacity;
     }
 
+    /**
+     * Get the source Pipe at the specified index, between 0 and
+     * getSourceCount() - 1.
+     *
+     * @param idx index
+     * @return source pipe at index
+     */
     public Pipe getSource(int idx) {
         return sources.get(idx);
     }
 
+    /**
+     * Query the actual number of connected sinks.
+     *
+     * @return number of sinks
+     */
     public int getSinkCount() {
         return sinks.size();
     }
 
+    /**
+     * Query the maximum number of sinks supported.
+     *
+     * @return maximum number of sinks
+     */
     public int getSinkCapacity() {
         return sinkCapacity;
     }
 
+    /**
+     * Get the sink Pipe at the specified index, between 0 and getSinkCount() -
+     * 1
+     *
+     * @param idx index
+     * @return sink pipe at index
+     */
     public Pipe getSink(int idx) {
         return sinks.get(idx);
     }
-    
-    public void reset() {}
 
+    /**
+     * Reset the Pipe to its default state. This is an empty hook that may be
+     * optionally implemented by sub-classes. The Pipe should set all
+     * non-transient state to its default values - eg. the frequency of an
+     * oscillator, but not its phase.
+     */
+    public void reset() {
+    }
+
+    /**
+     * Process output for the requested sink and time.
+     * <p>
+     * Sub-classes should normally just implement
+     * {@link #process(java.util.List)}
+     *
+     * @param sink requesting sink
+     * @param outputBuffer buffer to write in to
+     * @param time nanoseconds time of the requested buffer
+     */
     protected void process(Pipe sink, Buffer outputBuffer, long time) {
         int sinkIndex = sinks.indexOf(sink);
 
@@ -165,12 +230,38 @@ public abstract class Pipe {
         }
     }
 
+    /**
+     * Process buffers. Buffer data should be processed in-place. This method
+     * will be called once per processing cycle (time). The buffer list will be
+     * the maximum of source count or sink count. For buffers without a matching
+     * input Pipe the buffer will be clear.
+     *
+     * @param buffers list of buffers to process
+     */
     protected abstract void process(List<Buffer> buffers);
-    
+
+    /**
+     * A hook called instead of {@link #process(java.util.List)} if no sink
+     * requires output during processing. The number of samples being skipped
+     * (equivalent to the non-processed buffer's size) is given.
+     *
+     * @param samples number of samples skipped
+     */
     protected void skip(int samples) {
         // default no op hook
     }
-    
+
+    /**
+     * Write data to the output buffer. This method is only called if there is
+     * more than one sink Pipe and so the output buffer cannot be processed in
+     * place. By default this method will write the data from the processed
+     * input buffer at the same index if there is one, or otherwise clear the
+     * buffer.
+     *
+     * @param inputBuffers list of processed input buffers
+     * @param outputBuffer output buffer to write to
+     * @param sinkIndex index of the sink owning the buffer
+     */
     protected void writeOutput(List<Buffer> inputBuffers, Buffer outputBuffer, int sinkIndex) {
         if (sinkIndex < inputBuffers.size()) {
             outputBuffer.copy(inputBuffers.get(sinkIndex));
@@ -179,10 +270,28 @@ public abstract class Pipe {
         }
     }
 
+    /**
+     * Query whether this Pipe requires the output of the provided source Pipe.
+     * This method is generally called by the source Pipe during processing. By
+     * default, this method will return true if any sink of this Pipe requires
+     * the output of this Pipe. Sub-classes can override this to switch off
+     * processing eg. a mixer for silent channels
+     *
+     * @param source input source Pipe
+     * @param time processing time in nanoseconds
+     * @return true if this Pipe requires the output of the provided source
+     */
     protected boolean isOutputRequired(Pipe source, long time) {
         return isProcessRequired(time);
     }
 
+    /**
+     * Query whether this Pipe requires processing for the processing cycle at
+     * time. By default this method will check if any sink requires output.
+     *
+     * @param time processing time in nanoseconds
+     * @return true if this Pipe should process buffers
+     */
     protected boolean isProcessRequired(long time) {
         if (sinks.size() == 1) {
             return simpleOutputCheck(time);
@@ -191,6 +300,12 @@ public abstract class Pipe {
         }
     }
 
+    /**
+     * Register the provided source with this Pipe. Called as part of
+     * {@link #addSource(org.jaudiolibs.pipes.Pipe)}.
+     *
+     * @param source pipe being added as source
+     */
     protected void registerSource(Pipe source) {
         if (source == null) {
             throw new NullPointerException();
@@ -204,10 +319,23 @@ public abstract class Pipe {
         sources.add(source);
     }
 
+    /**
+     * Unregister the provided source with this Pipe. Called as part of
+     * {@link #removeSource(org.jaudiolibs.pipes.Pipe)}
+     *
+     * @param source pipe being removed as source
+     */
     protected void unregisterSource(Pipe source) {
         sources.remove(source);
     }
 
+    /**
+     * Register the provided sink with this Pipe. Called as part of
+     * {@link #addSource(org.jaudiolibs.pipes.Pipe)} being called on the sink
+     * Pipe.
+     *
+     * @param sink pipe being added as sink
+     */
     protected void registerSink(Pipe sink) {
         if (sink == null) {
             throw new NullPointerException();
@@ -221,6 +349,13 @@ public abstract class Pipe {
         sinks.add(sink);
     }
 
+    /**
+     * Unregister the provided sink with this Pipe. Called as part of
+     * {@link #removeSource(org.jaudiolibs.pipes.Pipe)} being called on the sink
+     * Pipe.
+     *
+     * @param sink pipe being removed as sink
+     */
     protected void unregisterSink(Pipe sink) {
         sinks.remove(sink);
     }

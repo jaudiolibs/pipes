@@ -15,17 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 
 package org.jaudiolibs.pipes;
 
 /**
- *
- * @author Neil C Smith
+ * Exception thrown if no more sources can be added to a Pipe.
  */
 public class SinkIsFullException extends RuntimeException {
 
