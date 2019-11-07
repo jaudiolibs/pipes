@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -26,28 +22,41 @@ import org.jaudiolibs.audioops.impl.GainOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A single channel unit that multiplies the signal by a linear gain value.
  */
 public final class Gain extends OpHolder {
 
     private final GainOp op;
-    
+
+    /**
+     * Create a Gain unit.
+     */
     public Gain() {
         this(new GainOp());
     }
-    
+
     private Gain(GainOp op) {
         super(op, 1);
         this.op = op;
         reset();
     }
-    
+
+    /**
+     * Set the linear gain level. Default 1.0.
+     *
+     * @param level linear gain
+     * @return this for chaining
+     */
     public Gain level(double level) {
         op.setGain((float) level);
         return this;
     }
-    
+
+    /**
+     * Query the linear gain value.
+     * 
+     * @return linear gain
+     */
     public double level() {
         return op.getGain();
     }
@@ -56,5 +65,5 @@ public final class Gain extends OpHolder {
     public void reset() {
         op.setGain(1);
     }
-    
+
 }

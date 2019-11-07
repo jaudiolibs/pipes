@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -28,48 +24,85 @@ import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A single channel oscillator unit. The waveforms are bandlimited, where
+ * appropriate, for audio use.
  */
 public final class Osc extends OpHolder {
-    
+
     private final static float DEFAULT_FREQUENCY = 440;
 
     private final Op op;
-    
+
+    /**
+     * Create an Osc unit.
+     */
     public Osc() {
         this(new Op());
     }
-    
+
     Osc(Op op) {
         super(op, 1);
         this.op = op;
         reset();
     }
 
+    /**
+     * Set the oscillator frequency in Hz. Default 440.
+     *
+     * @param frequency oscillator frequency in Hz
+     * @return this for chaining
+     */
     public Osc frequency(double frequency) {
         op.setFrequency((float) frequency);
         return this;
     }
 
+    /**
+     * Query the oscillator frequency.
+     *
+     * @return oscillator frequency in Hz
+     */
     public double frequency() {
         return op.getFrequency();
     }
 
+    /**
+     * Set the {@link Waveform} of the oscillator. Default
+     * {@link Waveform#Sine}.
+     *
+     * @param waveform oscillator waveform
+     * @return this for chaining
+     */
     public Osc waveform(Waveform waveform) {
         op.setWaveform(Objects.requireNonNull(waveform));
         return this;
     }
 
+    /**
+     * Query the waveform of the oscillator.
+     *
+     * @return waveform
+     */
     public Waveform waveform() {
         return op.getWaveform();
     }
 
+    /**
+     * Set the gain of the oscillator. Default 1.0.
+     *
+     * @param level linear gain
+     * @return this for chaining
+     */
     public Osc gain(double level) {
         op.setGain((float) level);
         return this;
     }
 
+    /**
+     * Query the gain of the oscillator.
+     *
+     * @return linear gain
+     */
     public double gain() {
         return op.getGain();
     }
@@ -150,7 +183,7 @@ public final class Osc extends OpHolder {
                 for (int i = 0; i < buffersize; i++) {
                     out[i] = g1 * nextSample();
                     g1 += delta;
-                } 
+                }
             } else {
                 Arrays.fill(out, 0);
                 phase += (phaseIncrement * buffersize);
@@ -171,7 +204,7 @@ public final class Osc extends OpHolder {
                 for (int i = 0; i < buffersize; i++) {
                     out[i] += g1 * nextSample();
                     g1 += delta;
-                } 
+                }
             } else {
                 phase += (phaseIncrement * buffersize);
                 while (phase >= TWOPI) {

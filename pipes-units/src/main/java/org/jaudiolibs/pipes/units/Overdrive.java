@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -26,28 +22,41 @@ import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A single channel unit that processes audio through a simple overdrive effect.
  */
 public final class Overdrive extends OpHolder {
 
     private final Op op;
 
+    /**
+     * Create an Overdrive unit.
+     */
     public Overdrive() {
         this(new Op());
     }
-    
+
     private Overdrive(Op op) {
         super(op, 1);
         this.op = op;
         reset();
     }
 
+    /**
+     * Drive amount. Default 0.0.
+     *
+     * @param amt drive 0 .. 1
+     * @return this for chaining
+     */
     public Overdrive drive(double amt) {
         op.setDrive(amt);
         return this;
     }
 
+    /**
+     * Query the drive.
+     *
+     * @return drive
+     */
     public double drive() {
         return op.getDrive();
     }
@@ -107,4 +116,3 @@ public final class Overdrive extends OpHolder {
     }
 
 }
-

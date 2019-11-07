@@ -15,18 +15,27 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * Oscillator waveform types.
  */
 public enum Waveform {
-    Sine, Square, Saw
+
+    /**
+     * Sine wave.
+     */
+    Sine,
+
+    /**
+     * Square wave.
+     */
+    Square,
+
+    /**
+     * Sawtooth wave.
+     */
+    Saw
     
 }

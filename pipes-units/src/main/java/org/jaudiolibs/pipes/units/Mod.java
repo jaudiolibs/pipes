@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -28,22 +24,36 @@ import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.Pipe;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A multi input unit that accumulates inputs into a single output using a
+ * custom function, or by multiplying if a custom function is not set.
  */
 public final class Mod extends Pipe {
 
     private DoubleBinaryOperator function;
 
+    /**
+     * Create a Mod unit supporting up to 32 input channels.
+     */
     public Mod() {
         super(32, 1);
     }
 
+    /**
+     * Custom function to accumulate input channels. The first input channel
+     * will be copied to the output. Values from each additional input channel
+     * will be accumulated to the output using this function, where the first
+     * value (left) is the existing output value, and the second value (right)
+     * is the value from the input channel. The default function will multiply
+     * values.
+     *
+     * @param function custom function to apply to each sample
+     * @return this for chaining
+     */
     public Mod function(DoubleBinaryOperator function) {
         this.function = function;
         return this;
     }
-    
+
     @Override
     protected void process(List<Buffer> buffers) {
         int sourceCount = getSourceCount();
@@ -65,7 +75,7 @@ public final class Mod extends Pipe {
             }
         }
     }
-    
+
     @Override
     protected void writeOutput(List<Buffer> inputs, Buffer output, int index) {
         super.writeOutput(inputs, output, 0);
@@ -76,6 +86,5 @@ public final class Mod extends Pipe {
     public void reset() {
         function = null;
     }
-
 
 }

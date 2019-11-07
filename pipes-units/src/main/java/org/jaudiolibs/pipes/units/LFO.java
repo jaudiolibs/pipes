@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -28,63 +24,111 @@ import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * Single channel low frequency oscillator unit. Unlike {@link Osc} the
+ * waveforms are not bandlimited, and by default the output is between 0 and 1
+ * (see {@link #bipolar(boolean)}).
  */
 public final class LFO extends OpHolder {
-
 
     private final static float DEFAULT_FREQUENCY = 1;
     private final static Waveform DEFAULT_WAVEFORM = Waveform.Sine;
 
     private final Op op;
 
+    /**
+     * Create an LFO unit.
+     */
     public LFO() {
         this(new Op());
     }
-    
+
     private LFO(Op op) {
         super(op, 0, 1);
         this.op = op;
         reset();
     }
 
+    /**
+     * Set oscillator frequency in Hz. Default value 1.0.
+     *
+     * @param frequency oscillator frequency in Hz.
+     * @return this for chaining
+     */
     public LFO frequency(double frequency) {
         op.setFrequency((float) frequency);
         return this;
     }
 
+    /**
+     * Query the oscillator frequency,
+     *
+     * @return frequency in Hz
+     */
     public double frequency() {
         return op.getFrequency();
     }
 
+    /**
+     * Set the oscillator waveform. Default {@link Waveform#Sine}.
+     *
+     * @param waveform type of wave
+     * @return this for chaining
+     */
     public LFO waveform(Waveform waveform) {
         op.setWaveform(Objects.requireNonNull(waveform));
         return this;
     }
 
+    /**
+     * Query the oscillator waveform.
+     *
+     * @return oscillator waveform
+     */
     public Waveform waveform() {
         return op.getWaveform();
     }
 
+    /**
+     * Set the oscillator gain. Default 1.0.
+     *
+     * @param level linear gain
+     * @return this for chaining
+     */
     public LFO gain(double level) {
         op.setGain((float) level);
         return this;
     }
 
+    /**
+     * Query the oscillator gain.
+     *
+     * @return linear gain
+     */
     public double gain() {
         return op.getGain();
     }
-    
+
+    /**
+     * Set the oscillator as bipolar - output values between -1.0 and 1.0 rather
+     * then between 0.0 and 1.0. Default false.
+     *
+     * @param bipolar output between -1.0 and 1.0
+     * @return this for chaining
+     */
     public LFO bipolar(boolean bipolar) {
         op.setBipolar(bipolar);
         return this;
     }
-    
+
+    /**
+     * Query whether the oscillator is set to bipolar output.
+     *
+     * @return bipolar
+     */
     public boolean bipolar() {
         return op.getBipolar();
     }
- 
+
     @Override
     public void reset() {
         op.setFrequency(DEFAULT_FREQUENCY);
@@ -135,7 +179,7 @@ public final class LFO extends OpHolder {
         public Waveform getWaveform() {
             return wave;
         }
-        
+
         public void setBipolar(boolean bipolar) {
             this.bipolar = bipolar;
         }
@@ -143,7 +187,7 @@ public final class LFO extends OpHolder {
         public boolean getBipolar() {
             return bipolar;
         }
-        
+
         @Override
         public void initialize(float samplerate, int buffersize) {
             this.srate = samplerate;

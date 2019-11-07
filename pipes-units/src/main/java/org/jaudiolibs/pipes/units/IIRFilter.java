@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -26,53 +22,101 @@ import org.jaudiolibs.audioops.impl.IIRFilterOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A single channel unit that processed audio through an IIR filter.
  */
 public final class IIRFilter extends OpHolder {
 
-    public enum Type {
-        LP6, LP12, LP24, HP12, HP24, BP12, NP12
-    }
-
+    /**
+     * 6dB one pole low pass filter.
+     */
     public final static Type LP6 = Type.LP6;
+
+    /**
+     * 12dB two pole low pass filter.
+     */
     public final static Type LP12 = Type.LP12;
+    /**
+     * 24dB four pole low pass filter.
+     */
     public final static Type LP24 = Type.LP24;
+    /**
+     * 12dB two pole high pass filter.
+     */
     public final static Type HP12 = Type.HP12;
+    /**
+     * 24dB four pole high pass filter.
+     */
     public final static Type HP24 = Type.HP24;
+    /**
+     * 12dB two pole band pass filter.
+     */
     public final static Type BP12 = Type.BP12;
+    /**
+     * 12dB two pole notch pass filter.
+     */
     public final static Type NP12 = Type.NP12;
 
     private final IIRFilterOp filter;
 
+    /**
+     * Create an IIRFilter unit.
+     */
     public IIRFilter() {
         this(new IIRFilterOp());
     }
-    
+
     private IIRFilter(IIRFilterOp filter) {
         super(filter, 1);
         this.filter = filter;
         reset();
     }
 
+    /**
+     * Set the filter frequency in Hz. Default 20,000.
+     *
+     * @param frequency filter frequency in Hz (20 .. 20,000)
+     * @return this for chaining
+     */
     public IIRFilter frequency(double frequency) {
         filter.setFrequency((float) Utils.constrain(frequency, 20, 20000));
         return this;
     }
 
+    /**
+     * Query the filter frequency in Hz.
+     *
+     * @return filter frequency
+     */
     public double frequency() {
         return filter.getFrequency();
     }
 
+    /**
+     * Set the filter resonance in dB. Default 0.
+     *
+     * @param db filter resonance (0 .. 30)
+     * @return this for chaining
+     */
     public IIRFilter resonance(double db) {
         filter.setResonance((float) Utils.constrain(db, 0, 30));
         return this;
     }
 
+    /**
+     * Query the filter resonance in dB.
+     *
+     * @return resonance in dB
+     */
     public double resonance() {
         return filter.getResonance();
     }
 
+    /**
+     * Set the filter type. Default {@link Type#LP6}
+     *
+     * @param type filter type
+     * @return this for chaining
+     */
     public IIRFilter type(Type type) {
         switch (type) {
             case LP6:
@@ -100,6 +144,11 @@ public final class IIRFilter extends OpHolder {
         return this;
     }
 
+    /**
+     * Query the filter type.
+     * 
+     * @return filter type
+     */
     public Type type() {
         switch (filter.getFilterType()) {
             case LP6:
@@ -125,6 +174,41 @@ public final class IIRFilter extends OpHolder {
         resonance(0);
         frequency(20000);
         type(LP6);
+    }
+
+    /**
+     * Filter type
+     */
+    public enum Type {
+
+        /**
+         * 6dB one pole low pass filter.
+         */
+        LP6,
+        /**
+         * 12dB two pole low pass filter.
+         */
+        LP12,
+        /**
+         * 24dB four pole low pass filter.
+         */
+        LP24,
+        /**
+         * 12dB two pole high pass filter.
+         */
+        HP12,
+        /**
+         * 24dB four pole high pass filter.
+         */
+        HP24,
+        /**
+         * 12dB two pole band pass filter.
+         */
+        BP12,
+        /**
+         * 12dB two pole notch pass filter.
+         */
+        NP12
     }
 
 }

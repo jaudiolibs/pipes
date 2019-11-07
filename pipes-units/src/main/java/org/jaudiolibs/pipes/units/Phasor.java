@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -26,8 +22,7 @@ import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A single channel sawtooth oscillator unit with controllable range.
  */
 public final class Phasor extends OpHolder {
 
@@ -35,48 +30,96 @@ public final class Phasor extends OpHolder {
 
     private final Op op;
 
+    /**
+     * Create a Phasor unit.
+     */
     public Phasor() {
         this(new Op());
     }
-    
+
     private Phasor(Op op) {
         super(op, 1);
         this.op = op;
         reset();
     }
 
+    /**
+     * Set the phasor frequency in Hz. Default 1.0.
+     *
+     * @param frequency phasor frequency in Hz
+     * @return this for chaining
+     */
     public Phasor frequency(double frequency) {
         op.setFrequency((float) frequency);
         return this;
     }
 
+    /**
+     * Query the phasor frequency.
+     *
+     * @return frequency in Hz
+     */
     public double frequency() {
         return op.getFrequency();
     }
-    
+
+    /**
+     * Set the lower bound of the phasor range. Default 0.0.
+     *
+     * @param minimum lower bound of phasor range
+     * @return this for chaining
+     */
     public Phasor minimum(double minimum) {
         op.setMinimum((float) minimum);
         return this;
     }
-    
+
+    /**
+     * Query the lower bound of the phasor range.
+     *
+     * @return lower bound of phasor range
+     */
     public double minimum() {
         return op.getMinimum();
     }
-    
+
+    /**
+     * Set the upper bound of the phasor range. Default 1.0.
+     *
+     * @param maximum upper bound of the phasor range
+     * @return this for chaining
+     */
     public Phasor maximum(double maximum) {
         op.setMaximum((float) maximum);
         return this;
     }
-    
+
+    /**
+     * Query the upper bound of the phasor range
+     *
+     * @return upper bound of phasor range
+     */
     public double maximum() {
         return op.getMaximum();
     }
-    
+
+    /**
+     * Set the phase of the oscillation, between 0 and TWO_PI. This is a
+     * transient property and not affected by {@link #reset()}.
+     *
+     * @param phase
+     * @return this for chaining
+     */
     public Phasor phase(double phase) {
         op.setPhase((float) phase);
         return this;
     }
-    
+
+    /**
+     * Query the current phase of the oscillation.
+     *
+     * @return current phase between 0 and TWO_PI
+     */
     public double phase() {
         return op.getPhase();
     }
@@ -113,19 +156,19 @@ public final class Phasor extends OpHolder {
         public float getFrequency() {
             return this.freq;
         }
-        
+
         public void setMinimum(float minimum) {
             this.minimum = minimum;
         }
-        
+
         public float getMinimum() {
             return minimum;
         }
-        
+
         public void setMaximum(float maximum) {
             this.maximum = maximum;
-        } 
-        
+        }
+
         public float getMaximum() {
             return maximum;
         }
@@ -133,11 +176,11 @@ public final class Phasor extends OpHolder {
         public void setPhase(float phase) {
             this.phase = Math.abs(phase) % TWOPI;
         }
-        
+
         public float getPhase() {
             return phase;
         }
-        
+
         @Override
         public void initialize(float samplerate, int buffersize) {
             this.srate = samplerate;

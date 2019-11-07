@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -27,8 +23,9 @@ import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.Pipe;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A sample loop recorder and player unit supporting up to 16 channels. A
+ * {@link #table(org.jaudiolibs.pipes.units.AudioTable)} must be supplied for
+ * the desired number of channels and recording length.
  */
 public final class Looper extends Pipe {
 
@@ -46,12 +43,23 @@ public final class Looper extends Pipe {
 
     private Channel[] channels;
 
+    /**
+     * Create a Looper unit.
+     */
     public Looper() {
         super(16, 16);
         channels = new Channel[]{new Channel()};
         reset();
     }
 
+    /**
+     * Set the {@link AudioTable} buffer for this looper. The length of the
+     * recording buffer and the number of channels available for recording is
+     * determined by the audio table. Default null.
+     *
+     * @param table recording buffer
+     * @return this for chaining
+     */
     public Looper table(AudioTable table) {
         if (table != this.table) {
             this.table = table;
@@ -60,10 +68,24 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Access the audio table, the recording buffer. This will return a direct
+     * and modifiable reference.
+     *
+     * @return audio table recording buffer, may be null
+     */
     public AudioTable table() {
         return table;
     }
 
+    /**
+     * Set the looping start point, normalized between 0.0 and 1.0, where 0.0 is
+     * the beginning of the recording buffer and 1.0 is the end of the buffer.
+     * Default 0.0.
+     *
+     * @param in loop start point 0 .. 1
+     * @return this for chaining
+     */
     public Looper in(double in) {
         if (in < 0) {
             in = 0;
@@ -74,10 +96,23 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Query the looping start point.
+     *
+     * @return loop start point
+     */
     public double in() {
         return in;
     }
 
+    /**
+     * Set the looping end point, normalized between 0.0 and 1.0, where 0.0 is
+     * the beginning of the recording buffer and 1.0 is the end of the buffer.
+     * Default 1.0.
+     *
+     * @param out loop end point 0 .. 1
+     * @return this for chaining
+     */
     public Looper out(double out) {
         if (out < 0) {
             out = 0;
@@ -88,10 +123,24 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Query the looping end point.
+     *
+     * @return loop end point
+     */
     public double out() {
         return out;
     }
 
+    /**
+     * Change the playback/recording position, normalized between 0.0 and 1.0,
+     * where 0.0 is the beginning of the recording buffer and 1.0 is the end of
+     * the buffer. This is a transient property that is not affected by calling
+     * {@link #reset()}.
+     *
+     * @param position playback/recording position
+     * @return this for chaining
+     */
     public Looper position(double position) {
         if (position < 0) {
             position = 0;
@@ -105,19 +154,43 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Query the playback/recording position.
+     *
+     * @return playback/recording position
+     */
     public double position() {
         return table == null ? 0 : cursor / table.size();
     }
 
+    /**
+     * Set the playback speed. Negative values are supported. Default 1.0. This
+     * value does not affect the speed of recording.
+     *
+     * @param speed playback speed
+     * @return this for chaining
+     */
     public Looper speed(double speed) {
         this.speed = speed;
         return this;
     }
 
+    /**
+     * Query the playback speed.
+     *
+     * @return playback speed
+     */
     public double speed() {
         return speed;
     }
 
+    /**
+     * Set the looper playing. This is a transient property that is not affected
+     * by calling {@link #reset()}.
+     *
+     * @param playing looper playing
+     * @return this for chaining
+     */
     public Looper playing(boolean playing) {
         if (this.playing != playing) {
             triggerSmoothing();
@@ -127,10 +200,22 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Query whether the looper is currently playing.
+     *
+     * @return playing
+     */
     public boolean playing() {
         return playing;
     }
 
+    /**
+     * Set whether the looper is recording. The looper must also be playing to
+     * record into the buffer. Default false.
+     *
+     * @param recording looper recording
+     * @return this for chaining
+     */
     public Looper recording(boolean recording) {
         if (this.recording != recording) {
             triggerSmoothing();
@@ -139,19 +224,42 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Query whether the looper is recording.
+     *
+     * @return recording
+     */
     public boolean recording() {
         return recording;
     }
 
+    /**
+     * Set whether the looper should loop or stop when playback/recording
+     * reaches the {@link #in()} or {@link #out()} point.
+     *
+     * @param looping loop at loop points
+     * @return this for chaining
+     */
     public Looper looping(boolean looping) {
         this.looping = looping;
         return this;
     }
 
+    /**
+     * Query whether the looper is currently set to loop.
+     *
+     * @return looping
+     */
     public boolean looping() {
         return looping;
     }
 
+    /**
+     * Start playing. Unlike {@link #playing(boolean)} this will also set the
+     * position to the loop in position (or out position if speed is negative).
+     *
+     * @return this for chaining
+     */
     public Looper play() {
         if (speed < 0) {
             position(1);
@@ -162,6 +270,11 @@ public final class Looper extends Pipe {
         return this;
     }
 
+    /**
+     * Stop playing.
+     *
+     * @return this for chaining
+     */
     public Looper stop() {
         playing(false);
         return this;
@@ -187,7 +300,6 @@ public final class Looper extends Pipe {
         return recording;
     }
 
-    
     @Override
     protected void process(List<Buffer> buffers) {
         if (buffers.size() != channels.length) {
@@ -239,7 +351,7 @@ public final class Looper extends Pipe {
         }
 
     }
-    
+
     @Override
     protected void skip(int samples) {
         int loopLength = iOut - iIn;
@@ -294,14 +406,14 @@ public final class Looper extends Pipe {
         private int smoothIndex = 0;
 
         private void processPlaying(Buffer buffer, int channel, boolean rendering) {
-            
+
             if (wasRecording) {
                 fadeFrom(channel, (int) cursor);
                 fadeTo(channel, (int) (cursor + 0.5));
                 smoothIndex = 0;
                 wasRecording = false;
             }
-            
+
             if (!rendering) {
                 smoothIndex = 0;
                 return;
@@ -356,7 +468,7 @@ public final class Looper extends Pipe {
             if (!wasRecording) {
                 smoothIndex = 0;
             }
-            
+
             int bSize = buffer.getSize();
             float[] data = buffer.getData();
             double p = cursor;
@@ -402,10 +514,9 @@ public final class Looper extends Pipe {
                 }
                 processStopped(buffer, 0, true);
             }
-            
+
         }
-        
-        
+
         private void processStopped(Buffer buffer, int offset, boolean rendering) {
             if (!rendering) {
                 smoothIndex = 0;
@@ -442,7 +553,7 @@ public final class Looper extends Pipe {
             fadeFrom(channel, iIn);
             fadeTo(channel, iOut);
         }
-        
+
         private void fadeTo(int channel, int idx) {
             if (idx < SMOOTH_AMOUNT) {
                 for (int i = 0; i < idx; i++) {
@@ -475,8 +586,7 @@ public final class Looper extends Pipe {
                 }
             }
         }
-        
-        
+
     }
 
 }

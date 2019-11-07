@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  *
- *
- * Please visit https://www.praxislive.org if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.pipes.units;
 
@@ -26,19 +22,22 @@ import org.jaudiolibs.audioops.impl.FreeverbOp;
 import org.jaudiolibs.pipes.OpHolder;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A mono or stereo unit that processes audio through a Java port of the
+ * Freeverb reverb.
  */
-public class Freeverb extends OpHolder {
+public final class Freeverb extends OpHolder {
 
     private final static float INITIAL_DAMP = 0.5f;
     private final static float INITIAL_DRY = 0.5f;
     private final static float INITIAL_ROOM_SIZE = 0.5f;
     private final static float INITIAL_WET = 0;
     private final static float INITIAL_WIDTH = 0.5f;
-    
+
     private final FreeverbOp op;
 
+    /**
+     * Create a Freeverb unit supporting up to two channels.
+     */
     public Freeverb() {
         this(new FreeverbOp(), 2);
     }
@@ -49,51 +48,107 @@ public class Freeverb extends OpHolder {
         reset();
     }
 
+    /**
+     * Set the damp value of the reverb. Default value 0.5.
+     *
+     * @param damp damp value
+     * @return this for chaining
+     */
     public Freeverb damp(double damp) {
         op.setDamp((float) Utils.constrain(damp, 0, 1));
         return this;
     }
-    
+
+    /**
+     * Query the damp value.
+     *
+     * @return damp value
+     */
     public double damp() {
         return op.getDamp();
     }
-    
+
+    /**
+     * Set the amount of dry (unprocessed) signal in the output. Default value
+     * 0.5.
+     *
+     * @param dry amount of dry (unprocessed) signal (0 .. 1)
+     * @return this for chaining
+     */
     public Freeverb dry(double dry) {
         op.setDry((float) Utils.constrain(dry, 0, 1));
         return this;
     }
-    
+
+    /**
+     * Query the amount of dry (unprocessed) signal in the output.
+     *
+     * @return amount of dry signal
+     */
     public double dry() {
         return op.getDry();
     }
-    
+
+    /**
+     * Set the room size of the reverb. Default value 0.5.
+     *
+     * @param size room size (0 .. 1)
+     * @return this for chaining
+     */
     public Freeverb roomSize(double size) {
         op.setRoomSize((float) Utils.constrain(size, 0, 1));
         return this;
     }
-    
+
+    /**
+     * Query the room size of the reverb.
+     *
+     * @return room size
+     */
     public double roomSize() {
         return op.getRoomSize();
     }
-    
+
+    /**
+     * Set the amount of wet (processed) signal in the output. Default value 0.
+     *
+     * @param wet amount of wet (processed) signal (0 .. 1)
+     * @return this for chaining
+     */
     public Freeverb wet(double wet) {
         op.setWet((float) Utils.constrain(wet, 0, 1));
         return this;
     }
-    
+
+    /**
+     * Query the amount of wet (processed) signal in the output.
+     *
+     * @return amount of wet signal
+     */
     public double wet() {
         return op.getWet();
     }
-    
+
+    /**
+     * Set the width of the reverb. Default value 0.5.
+     * 
+     * @param width width of reverb (0 .. 1)
+     * @return this for chaining
+     */
     public Freeverb width(double width) {
         op.setWidth((float) Utils.constrain(width, 0, 1));
         return this;
     }
-    
+
+    /**
+     * Query the width of the reverb.
+     * 
+     * @return width
+     */
     public double width() {
         return op.getWidth();
     }
-    
+
     @Override
     public void reset() {
         op.setDamp(INITIAL_DAMP);
