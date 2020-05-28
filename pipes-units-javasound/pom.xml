@@ -29,7 +29,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>org.jaudiolibs.pipes</Automatic-Module-Name>
+              <Automatic-Module-Name>org.jaudiolibs.pipes.units.javasound</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>

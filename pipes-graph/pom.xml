@@ -30,7 +30,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>org.jaudiolibs.pipes</Automatic-Module-Name>
+              <Automatic-Module-Name>org.jaudiolibs.pipes.graph</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>
