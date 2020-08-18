@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.audioservers.AudioServer;
 import org.jaudiolibs.audioservers.AudioServerProvider;
@@ -63,7 +65,9 @@ public class GraphPlayer implements Runnable {
         this.config = new AudioConfiguration(sampleRate,
                 graph.inputs.length,
                 graph.outputs.length,
-                bufferSize);
+                bufferSize,
+                init.exts.toArray()
+        );
         this.client = new PipesAudioClient(blockSize,
                 graph.inputs.length,
                 graph.outputs.length);
@@ -210,6 +214,7 @@ public class GraphPlayer implements Runnable {
     public static class Builder {
 
         private final Graph graph;
+        private final List<Object> exts;
 
         private String libName = "";
         private float sampleRate = DEFAULT_SAMPLERATE;
@@ -218,6 +223,7 @@ public class GraphPlayer implements Runnable {
 
         private Builder(Graph graph) {
             this.graph = graph;
+            this.exts = new ArrayList<>();
         }
 
         /**
@@ -271,8 +277,20 @@ public class GraphPlayer implements Runnable {
         }
 
         /**
+         * Add a system extension object for configuring the AudioServer
+         * library.
+         *
+         * @param obj extension (may not be null)
+         * @return this
+         */
+        public Builder ext(Object obj) {
+            exts.add(Objects.requireNonNull(obj));
+            return this;
+        }
+
+        /**
          * Build the GraphPlayer
-         * 
+         *
          * @return graph player
          */
         public GraphPlayer build() {
